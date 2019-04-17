@@ -8,7 +8,7 @@ from sklearn.datasets import make_classification
 SEED = 42
 
 class Perceptron(classifier):
-    def __init__(self, learning_rate=0.001, epochs=10, seed=SEED, activation="relu"):
+    def __init__(self, learning_rate=0.001, epochs=1000, seed=SEED, activation="relu"):
         super().__init__()
         random.seed(seed)
         self.learning_rate = learning_rate
@@ -27,7 +27,8 @@ class Perceptron(classifier):
         self.weights = np.zeros(X.shape[1])
         self.bias = 1
         for i in range(self.epochs):
-            print("Epoch: %d, weights: %s, bias: %s" % (i, self.weights, self.bias))
+            if (i % 100 == 0):
+                print("Epoch: %d, weights: %s, bias: %s" % (i, self.weights, self.bias))
             for j in range(X.shape[0]):
                 self.sgd(X[j], Y[j])
 
@@ -44,10 +45,8 @@ class Perceptron(classifier):
 
     def sgd(self, x, y):
         prediction = self._predict(x)
-        new_bias = self.bias + self.learning_rate * (y - prediction) * self.bias
-        new_weights = self.weights + self.learning_rate * (y - prediction) * x
-        self.bias = new_bias
-        self.weights = new_weights
+        self.bias = self.bias + self.learning_rate * (y - prediction) * self.bias
+        self.weights = self.weights + self.learning_rate * (y - prediction) * x
 
     def relu(self, y):
         if y < 0:
@@ -60,13 +59,15 @@ class Perceptron(classifier):
 
 def main():
     X, Y = make_classification(200, 2, 2, 0, weights=[.5, .5], random_state=SEED)
-    perceptron = Perceptron(epochs=100, activation="sigmoid")
+    perceptron = Perceptron(epochs=1000, activation="sigmoid")
     perceptron.fit(X, Y)
     predictions = perceptron.predict(X)
     plt.scatter(X[:,0], X[:,1], c=Y)
     x = np.linspace(-3.0, 3.0, num=100)
-    y = perceptron.weights[0] * x + perceptron.bias
-    plt.plot(x, y)
+    y1 = perceptron.weights[0] * x + perceptron.bias
+    y2 = perceptron.weights[1] * x + perceptron.bias
+    plt.plot(x, y1)
+    plt.plot(x, y2)
     plt.show()
 
 if __name__ == "__main__":
